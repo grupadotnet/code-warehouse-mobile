@@ -1,4 +1,4 @@
-package pk.knpmi.barcode.ui.theme
+package pk.knpmi.barcode.presentation.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
