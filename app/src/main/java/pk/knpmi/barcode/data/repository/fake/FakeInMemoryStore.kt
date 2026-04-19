@@ -1,4 +1,4 @@
-package pk.knpmi.barcode.data.repository.fake_repository
+package pk.knpmi.barcode.data.repository.fake
 
 import pk.knpmi.barcode.domain.model.Localisation
 import pk.knpmi.barcode.domain.model.Product

@@ -4,8 +4,8 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import pk.knpmi.barcode.data.repository.fake_repository.FakeLocalisationRepository
-import pk.knpmi.barcode.data.repository.fake_repository.FakeProductRepository
+import pk.knpmi.barcode.data.repository.fake.FakeLocalisationRepository
+import pk.knpmi.barcode.data.repository.fake.FakeProductRepository
 import pk.knpmi.barcode.domain.repository.LocalisationRepository
 import pk.knpmi.barcode.domain.repository.ProductRepository
 import javax.inject.Singleton
