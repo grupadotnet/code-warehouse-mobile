@@ -1,14 +1,15 @@
-package pk.knpmi.barcode.data.repository.fake_repository
+package pk.knpmi.barcode.data.repository.fake
 
 import android.util.Log
 import pk.knpmi.barcode.domain.model.Localisation
 import pk.knpmi.barcode.domain.model.Product
 import pk.knpmi.barcode.domain.repository.LocalisationRepository
+import javax.inject.Inject
 
 /**
  * Simple in-memory fake for locations.
  */
-class FakeLocalisationRepository : LocalisationRepository {
+class FakeLocalisationRepository @Inject constructor() : LocalisationRepository {
 
     private val tag = "FakeLocalisationRepository" // Tag used by Logcat to group messages.
 

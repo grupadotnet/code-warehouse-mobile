@@ -1,11 +1,12 @@
-package pk.knpmi.barcode.data.repository.fake_repository
+package pk.knpmi.barcode.data.repository.fake
 
 import android.util.Log
 import pk.knpmi.barcode.domain.model.Product
 import pk.knpmi.barcode.domain.model.ProductMetadata
 import pk.knpmi.barcode.domain.repository.ProductRepository
+import javax.inject.Inject
 
-class FakeProductRepository : ProductRepository {
+class FakeProductRepository @Inject constructor() : ProductRepository {
 
     private val tag = "FakeProductRepository" // Tag used by Logcat to group messages.
 
