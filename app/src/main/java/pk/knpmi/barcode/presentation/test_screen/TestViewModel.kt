@@ -158,16 +158,6 @@ class TestViewModel @Inject constructor(
         }
     }
 
-    fun changeSelectedProductQuantity(delta: Double) {
-        val product = _state.value.product ?: return
-        val updated = product.copy(quantity = (product.quantity + delta).coerceAtLeast(0.0), date = System.currentTimeMillis())
-        viewModelScope.launch {
-            _state.value = _state.value.copy(isLoading = true, message = null)
-            productRepository.update(updated)
-            _state.value = _state.value.copy(isLoading = false, product = updated, message = "Zmieniono ilość: ${updated.quantity}")
-        }
-    }
-
     private fun refreshMetadata() {
         viewModelScope.launch {
             _state.value = _state.value.copy(isLoading = true, message = null)

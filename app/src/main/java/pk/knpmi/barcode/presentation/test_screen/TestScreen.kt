@@ -1,7 +1,6 @@
 package pk.knpmi.barcode.presentation.test_screen
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -11,6 +10,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -24,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TestScreen(
     viewModel: TestViewModel = hiltViewModel(),
@@ -34,6 +39,7 @@ fun TestScreen(
     var category by remember { mutableStateOf("") }
     var localisationId by remember { mutableStateOf("") }
     var quantityText by remember { mutableStateOf("1") }
+    var expanded by remember { mutableStateOf(false) }
 
     LaunchedEffect(state.product, state.pendingNewProductBarcode) {
         val product = state.product
@@ -84,18 +90,6 @@ fun TestScreen(
             Text(state.product?.toString() ?: "—")
 
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-//                Button(
-//                    onClick = { viewModel.changeSelectedProductQuantity(+1.0) },
-//                    enabled = state.product != null && !state.isLoading,
-//                ) {
-//                    Text("+1")
-//                }
-//                Button(
-//                    onClick = { viewModel.changeSelectedProductQuantity(-1.0) },
-//                    enabled = state.product != null && !state.isLoading,
-//                ) {
-//                    Text("-1")
-//                }
                 Button(
                     onClick = { viewModel.beginMoveSelectedProduct() },
                     enabled = state.product != null && !state.isLoading,
@@ -128,20 +122,37 @@ fun TestScreen(
                 label = { Text("Name") },
                 singleLine = true,
             )
-            OutlinedTextField(
-                modifier = Modifier.fillMaxWidth(),
-                value = category,
-                onValueChange = { category = it },
-                label = { Text("Category") },
-                singleLine = true,
-            )
-            OutlinedTextField(
-                modifier = Modifier.fillMaxWidth(),
-                value = localisationId,
-                onValueChange = { localisationId = it },
-                label = { Text("Localisation id") },
-                singleLine = true,
-            )
+            ExposedDropdownMenuBox(
+                expanded = expanded,
+                onExpandedChange = { expanded = it },
+            ) {
+                OutlinedTextField(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .menuAnchor(),
+                    value = category,
+                    onValueChange = {},
+                    label = { Text("Category") },
+                    singleLine = true,
+                    readOnly = true,
+                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                    colors = ExposedDropdownMenuDefaults.textFieldColors(),
+                )
+                DropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false }
+                ) {
+                    state.metadata?.categories?.forEach { item ->
+                        DropdownMenuItem(
+                            text = { Text(item) },
+                            onClick = {
+                                category = item
+                                expanded = false
+                            }
+                        )
+                    }
+                }
+            }
             OutlinedTextField(
                 modifier = Modifier.fillMaxWidth(),
                 value = quantityText,
