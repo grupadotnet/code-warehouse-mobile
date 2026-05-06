@@ -6,6 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.material3.Surface
 import dagger.hilt.android.AndroidEntryPoint
+import pk.knpmi.barcode.presentation.test_screen.TestScreen
 import pk.knpmi.barcode.presentation.ui.theme.ProjectBarcodeTheme
 
 @AndroidEntryPoint
@@ -16,7 +17,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             ProjectBarcodeTheme {
                 Surface {
-
+                    TestScreen()
                 }
             }
         }
