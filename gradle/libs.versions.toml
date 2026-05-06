@@ -15,6 +15,8 @@ ksp = "2.0.21-1.0.26"
 hiltNavigationCompose = "1.2.0"
 navigationRuntimeKtx = "2.9.7"
 mockk = "1.13.12"
+camerax = "1.4.0"
+mlkit-barcode = "17.2.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -46,6 +48,12 @@ androidx-navigation-runtime-ktx = { group = "androidx.navigation", name = "navig
 # Mock
 mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
 mockk-android = { group = "io.mockk", name = "mockk-android", version.ref = "mockk" }
+# CameraX
+camera-camera2 = { module = "androidx.camera:camera-camera2", version.ref = "camerax" }
+camera-lifecycle = { module = "androidx.camera:camera-lifecycle", version.ref = "camerax" }
+camera-view = { module = "androidx.camera:camera-view", version.ref = "camerax" }
+# Barcode Scanner
+mlkit-barcode = { module = "com.google.mlkit:barcode-scanning", version.ref = "mlkit-barcode" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

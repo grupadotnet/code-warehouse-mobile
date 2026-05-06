@@ -73,4 +73,10 @@ dependencies {
     // Mock
     testImplementation(libs.mockk)
     androidTestImplementation(libs.mockk.android)
+    // CameraX
+    implementation(libs.camera.camera2)
+    implementation(libs.camera.lifecycle)
+    implementation(libs.camera.view)
+    // Barcode Scanner
+    implementation(libs.mlkit.barcode)
 }
