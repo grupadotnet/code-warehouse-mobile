@@ -8,6 +8,7 @@ import androidx.compose.material3.Surface
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
 import dagger.hilt.android.AndroidEntryPoint
 import pk.knpmi.barcode.presentation.camera_screen.CameraScannerScreen
 import pk.knpmi.barcode.presentation.test_screen.TestScreen
@@ -36,8 +37,12 @@ class MainActivity : ComponentActivity() {
                             )
                         }
 
-                        composable<Screen.Test>{
-                            TestScreen()
+                        composable<Screen.Test>{backStackEntry ->
+                            val route: Screen.Test = backStackEntry.toRoute()
+
+                            TestScreen(
+                                barcode = route.barcode ?: ""
+                            )
                         }
                     }
 
