@@ -9,10 +9,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.HorizontalDivider
@@ -20,56 +21,58 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TestScreen(
-    viewModel: TestViewModel = hiltViewModel(),
     barcode: String,
+    scannedLocalisationId: String?,
+    onScanProduct: () -> Unit,
+    onScanLocalisation: () -> Unit,
+    onSaved: () -> Unit,
+    viewModel: TestViewModel = hiltViewModel(),
 ) {
-    val state by viewModel.state
+    val state by viewModel.uiState.collectAsState()
 
-    var name by remember { mutableStateOf("") }
-    var category by remember { mutableStateOf("") }
-    var localisationId by remember { mutableStateOf("") }
-    var quantityText by remember { mutableStateOf("1") }
-    var expanded by remember { mutableStateOf(false) }
+    LaunchedEffect(barcode, scannedLocalisationId) {
+        viewModel.load(initialProductBarcode = barcode, scannedLocalisationId = scannedLocalisationId)
+    }
 
-    LaunchedEffect(state.product, state.pendingNewProductBarcode, barcode) {
-        val product = state.product
-        if (product != null) {
-            name = product.name
-            category = product.category
-            localisationId = product.localisationId
-            quantityText = product.quantity.toString()
-        } else if (state.pendingNewProductBarcode != null) {
-            name = ""
-            category = state.metadata?.categories?.firstOrNull().orEmpty()
-            localisationId = state.localisation?.id.orEmpty()
-            quantityText = "1"
-        }
-        if (barcode.isNotEmpty()) {
-            viewModel.onBarcodeInputChange(barcode)
+    LaunchedEffect(viewModel) {
+        viewModel.events.collect { event ->
+            if (event is TestEvent.Saved) {
+                onSaved()
+            }
         }
     }
 
+    var expanded by remember { mutableStateOf(false) }
+
     LazyColumn(
-        modifier = Modifier.fillMaxSize().padding(16.dp),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         item {
-            Text("Test screen (fake repo) – ręczne skany")
+            Text("Test screen – skan + repo")
 
             if (state.message != null) {
-                Text(state.message!!)
+                Text(state.message ?: "")
             }
+
+            Text(
+                "Cache productId: ${state.product?.id ?: state.pendingNewProductBarcode ?: "—"}",
+            )
 
             OutlinedTextField(
                 modifier = Modifier.fillMaxWidth(),
@@ -80,10 +83,10 @@ fun TestScreen(
             )
 
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                Button(onClick = { viewModel.scanProduct() }, enabled = !state.isLoading) {
+                Button(onClick = onScanProduct, enabled = !state.isLoading) {
                     Text("Scan PRODUCT")
                 }
-                Button(onClick = { viewModel.scanLocalisation() }, enabled = !state.isLoading) {
+                Button(onClick = onScanLocalisation, enabled = !state.isLoading) {
                     Text("Scan LOCATION")
                 }
             }
@@ -121,11 +124,12 @@ fun TestScreen(
 
             OutlinedTextField(
                 modifier = Modifier.fillMaxWidth(),
-                value = name,
-                onValueChange = { name = it },
+                value = state.name,
+                onValueChange = viewModel::onNameChange,
                 label = { Text("Name") },
                 singleLine = true,
             )
+
             ExposedDropdownMenuBox(
                 expanded = expanded,
                 onExpandedChange = { expanded = it },
@@ -134,7 +138,7 @@ fun TestScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .menuAnchor(),
-                    value = category,
+                    value = state.category,
                     onValueChange = {},
                     label = { Text("Category") },
                     singleLine = true,
@@ -142,40 +146,45 @@ fun TestScreen(
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
                     colors = ExposedDropdownMenuDefaults.textFieldColors(),
                 )
+
                 DropdownMenu(
                     expanded = expanded,
-                    onDismissRequest = { expanded = false }
+                    onDismissRequest = { expanded = false },
                 ) {
                     state.metadata?.categories?.forEach { item ->
                         DropdownMenuItem(
                             text = { Text(item) },
                             onClick = {
-                                category = item
+                                viewModel.onCategoryChange(item)
                                 expanded = false
-                            }
+                            },
                         )
                     }
                 }
             }
+
             OutlinedTextField(
                 modifier = Modifier.fillMaxWidth(),
-                value = quantityText,
-                onValueChange = { quantityText = it },
+                value = state.quantityText,
+                onValueChange = viewModel::onQuantityChange,
                 label = { Text("Quantity (Double)") },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+            )
+
+            OutlinedTextField(
+                modifier = Modifier.fillMaxWidth(),
+                value = state.localisationId,
+                onValueChange = viewModel::onLocalisationChange,
+                label = { Text("Localisation (ID)") },
                 singleLine = true,
             )
 
             Button(
-                onClick = {
-                    val quantity = quantityText.replace(',', '.').toDoubleOrNull() ?: 0.0
-                    viewModel.createOrOverwriteProduct(
-                        name = name,
-                        category = category,
-                        localisationId = localisationId,
-                        quantity = quantity,
-                    )
-                },
-                enabled = !state.isLoading && (state.pendingNewProductBarcode != null || state.product != null),
+                onClick = { viewModel.save() },
+                enabled = !state.isLoading &&
+                    !state.isSaving &&
+                    (state.pendingNewProductBarcode != null || state.product != null),
             ) {
                 Text("SAVE")
             }
@@ -185,6 +194,7 @@ fun TestScreen(
             Text("Lokalizacja: ${state.localisation?.id ?: "—"} (${state.localisation?.name ?: "—"})")
             Text("Produkty w lokalizacji: ${state.productsAtLocalisation.size}")
         }
+
         items(state.productsAtLocalisation) { p ->
             Text("${p.id} • ${p.name} • qty=${p.quantity}")
         }
