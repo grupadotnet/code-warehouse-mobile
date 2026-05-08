@@ -60,10 +60,8 @@ fun CameraScannerScreen(
             Text("No camera permission")
             Button(
                 onClick = {
-                    val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply{
-                        data = Uri.fromParts("package", localContext.packageName, null)
-                    }
-                    localContext.startActivity(intent)
+                    // Open settings to allow user to grant permission manually
+                    permissionState.onOpenSettings()
                 }
             ) {
                 Text("Give permission")
