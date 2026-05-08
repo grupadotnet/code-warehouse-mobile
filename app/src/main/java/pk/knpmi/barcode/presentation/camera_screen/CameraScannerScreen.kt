@@ -1,13 +1,9 @@
 package pk.knpmi.barcode.presentation.camera_screen
 
-import android.Manifest
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.net.Uri
 import android.provider.Settings
 import android.widget.Toast
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.Preview
@@ -21,10 +17,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -32,6 +25,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import pk.knpmi.barcode.presentation.util.BarcodeAnalyzer
+import pk.knpmi.barcode.presentation.util.rememberCameraPermissionState
 import java.util.concurrent.Executors
 
 @Composable
@@ -41,22 +35,13 @@ fun CameraScannerScreen(
     val lifecycleOwner = LocalLifecycleOwner.current
     val localContext = LocalContext.current
 
-    // Runtime permission gate for CameraX.
-    var hasCameraPermission by remember {
-        mutableStateOf(
-            ContextCompat.checkSelfPermission(localContext, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED
-        )
-    }
-
-    val permissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission(),
-        onResult = { granted -> hasCameraPermission = granted },
-    )
+    // Use the separated permission logic
+    val permissionState = rememberCameraPermissionState()
 
     // Ask on first composition, user can retry via UI below.
     LaunchedEffect(Unit) {
-        if (!hasCameraPermission) {
-            permissionLauncher.launch(Manifest.permission.CAMERA)
+        if (!permissionState.hasPermission) {
+            permissionState.onRequestPermission()
         }
     }
 
@@ -65,24 +50,8 @@ fun CameraScannerScreen(
     DisposableEffect(Unit) {
         onDispose { cameraExecutor.shutdown() }
     }
-    
-    // Observe if camera permission is granted then change hasCameraPermission variable to lunch the camera
-    DisposableEffect(lifecycleOwner) {
-        val observer = androidx.lifecycle.LifecycleEventObserver { _, event ->
-            if (event == androidx.lifecycle.Lifecycle.Event.ON_RESUME && !hasCameraPermission) {
-                hasCameraPermission = ContextCompat.checkSelfPermission(
-                    localContext,
-                    Manifest.permission.CAMERA
-                ) == PackageManager.PERMISSION_GRANTED
-            }
-        }
-        lifecycleOwner.lifecycle.addObserver(observer)
-        onDispose {
-            lifecycleOwner.lifecycle.removeObserver(observer)
-        }
-    }
 
-    if (!hasCameraPermission) {
+    if (!permissionState.hasPermission) {
         Column(
             modifier = modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -97,7 +66,7 @@ fun CameraScannerScreen(
                     localContext.startActivity(intent)
                 }
             ) {
-                    Text("Give permission")
+                Text("Give permission")
             }
         }
         return
