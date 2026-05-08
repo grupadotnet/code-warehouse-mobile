@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.hilt)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 android {
@@ -70,7 +71,15 @@ dependencies {
     implementation(libs.hilt.navigation.compose)
     // Navigation
     implementation(libs.androidx.navigation.runtime.ktx)
+    // Kotlinx Serialization
+    implementation(libs.kotlinx.serialization.json)
     // Mock
     testImplementation(libs.mockk)
     androidTestImplementation(libs.mockk.android)
+    // CameraX
+    implementation(libs.camera.camera2)
+    implementation(libs.camera.lifecycle)
+    implementation(libs.camera.view)
+    // Barcode Scanner
+    implementation(libs.mlkit.barcode)
 }

@@ -32,6 +32,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 @Composable
 fun TestScreen(
     viewModel: TestViewModel = hiltViewModel(),
+    barcode: String,
 ) {
     val state by viewModel.state
 
@@ -41,7 +42,7 @@ fun TestScreen(
     var quantityText by remember { mutableStateOf("1") }
     var expanded by remember { mutableStateOf(false) }
 
-    LaunchedEffect(state.product, state.pendingNewProductBarcode) {
+    LaunchedEffect(state.product, state.pendingNewProductBarcode, barcode) {
         val product = state.product
         if (product != null) {
             name = product.name
@@ -53,6 +54,9 @@ fun TestScreen(
             category = state.metadata?.categories?.firstOrNull().orEmpty()
             localisationId = state.localisation?.id.orEmpty()
             quantityText = "1"
+        }
+        if (barcode.isNotEmpty()) {
+            viewModel.onBarcodeInputChange(barcode)
         }
     }
 
