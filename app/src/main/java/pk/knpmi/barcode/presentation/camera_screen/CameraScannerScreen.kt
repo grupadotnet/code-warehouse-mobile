@@ -20,7 +20,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -31,9 +30,9 @@ import java.util.concurrent.Executors
 @Composable
 fun CameraScannerScreen(
     modifier: Modifier = Modifier,
+    onBarcodeScanned: (String) -> Unit
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
-    val localContext = LocalContext.current
 
     // Use the separated permission logic
     val permissionState = rememberCameraPermissionState()
@@ -97,7 +96,7 @@ fun CameraScannerScreen(
                                 BarcodeAnalyzer { value ->
                                     // Analyzer runs on a background thread, UI calls (Toast) must be posted to the main thread to avoid threading issues.
                                     ContextCompat.getMainExecutor(ctx).execute {
-                                        Toast.makeText(ctx, value, Toast.LENGTH_SHORT).show() // TODO: change it to navigate to form with detected
+                                        onBarcodeScanned(value) // Launch form screen
                                     }
                                 },
                             )
