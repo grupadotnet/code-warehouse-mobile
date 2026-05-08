@@ -5,9 +5,15 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.material3.Surface
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
 import dagger.hilt.android.AndroidEntryPoint
+import pk.knpmi.barcode.presentation.camera_screen.CameraScannerScreen
 import pk.knpmi.barcode.presentation.test_screen.TestScreen
 import pk.knpmi.barcode.presentation.ui.theme.ProjectBarcodeTheme
+import pk.knpmi.barcode.presentation.util.Screen
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -17,7 +23,29 @@ class MainActivity : ComponentActivity() {
         setContent {
             ProjectBarcodeTheme {
                 Surface {
-                    TestScreen()
+                    val navController = rememberNavController()
+
+                    NavHost(
+                        navController = navController,
+                        startDestination = Screen.CameraScreen
+                    ){
+                        composable<Screen.CameraScreen> {
+                            CameraScannerScreen(
+                                onBarcodeScanned = { barcode ->
+                                    navController.navigate(Screen.Test(barcode))
+                                }
+                            )
+                        }
+
+                        composable<Screen.Test>{backStackEntry ->
+                            val route: Screen.Test = backStackEntry.toRoute()
+
+                            TestScreen(
+                                barcode = route.barcode ?: ""
+                            )
+                        }
+                    }
+
                 }
             }
         }
